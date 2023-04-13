@@ -1,0 +1,100 @@
+import openai
+import pyttsx3
+import tkinter as tk
+import win32com.client as wincl
+
+
+# OpenAI API authentication
+openai.organization = "org-hV55Q7jK16nHIybWzSOEun90"
+openai.api_key = ""
+
+# Set up TTS engine
+engine = pyttsx3.init()
+
+# Set up GUI window
+root = tk.Tk()
+root.title("AI Chatbot")
+root.geometry("1920x1080")
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+
+# Load background image
+#bg_image = tk.PhotoImage(file="C:\Users\JoshuaLesser\Downloads\michelangelo.jpg")
+
+# Set up background label
+#bg_label = tk.Label(root, image=bg_image)
+#bg_label.place(relwidth=1, relheight=1)
+
+
+# Set up chat history display
+chat_history = tk.Text(root, bg="white", font=("Times", 18), wrap="word", state="disabled")
+chat_history.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+chat_history.config(width=50)  # Add padding to the right
+
+# Set up user input field
+user_input = tk.Entry(root, bg="white", font=("Helvetica", 18), fg="purple")
+user_input.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+user_input.bind("<Return>", lambda event: get_response())
+
+# Set up intro message
+chat_history.configure(state="normal")
+chat_history.insert("end", "\n")
+chat_history.insert("end", "Hi, I'm an AI chatbot! Ask me anything or type 'quit' to exit.\n\n", "bot")
+chat_history.tag_config("bot", justify="center", lmargin1=5, lmargin2=5)
+chat_history.configure(state="disabled")
+chat_history.tag_add("bot", "1.0", "end")
+chat_history.tag_configure("bot", justify="center")
+chat_history.tag_configure("bot", font=("Helvetica", 18))
+chat_history.tag_configure("bot", spacing1=10)
+chat_history.tag_configure("bot", spacing2=10)
+chat_history.tag_configure("bot", foreground="#009688")
+chat_history.tag_configure("bot", wrap="word")
+chat_history.tag_configure("bot", background="#F5F5F5")
+chat_history.tag_configure("bot", relief="groove")
+chat_history.tag_configure("bot", borderwidth=2)
+chat_history.tag_raise("bot")
+chat_history.insert("end", "\n")
+chat_history.see("end")
+
+
+# Set up function to get bot response
+def get_response():
+    user_message = user_input.get()
+    user_input.delete(0, tk.END)
+    
+    if user_message.lower() == "quit":
+        root.destroy()
+        return
+    
+    # Generate response from OpenAI
+    prompt = f"{user_message}\nA:"
+    model_engine = "text-davinci-003"
+    completions = openai.Completion.create(
+        engine=model_engine,
+        prompt=prompt,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    bot_response = completions.choices[0].text.strip()
+    
+    # Display response in chat history
+    chat_history.configure(state="normal")
+    chat_history.tag_config("bot", justify="center")
+    chat_history.tag_config("user", justify="center", foreground="purple")
+    chat_history.insert("end", f"\nYou: {user_message}\n", "user")
+    chat_history.insert("end", "\n")
+    chat_history.insert("end", f"\nBot: {bot_response}\n", "bot")
+    chat_history.configure(state="disabled")
+    
+    # Speak response using TTS engine
+    engine.say(bot_response)
+    engine.runAndWait()
+    
+    # Scroll to end of chat history
+    chat_history.see(tk.END)
+
+# Start GUI main loop
+user_input.focus()
+root.mainloop()
