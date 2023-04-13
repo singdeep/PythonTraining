@@ -1,6 +1,7 @@
 import requests
+import os
 
-CLOUD_API_KEY = 'AIzaSyArB5LScK5-wlulS300EaE3t0Tx4Qw1Db4'
+CLOUD_API_KEY = os.environ["OPENAI_API_KEY"]
 location = '41.06312718035604, -85.14700344428779' #later on this could be wherever you drop the pin on the map
 radius = 1000  # radius in meters, adjust as needed
 type = 'restaurant'
